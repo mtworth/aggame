@@ -50,7 +50,7 @@ commodity_data['Formatted_Value'] = commodity_data['Value'].apply(format_value)
 def generate_sms_link(guesses, state, success):
     performance = "".join(guesses)
     status = "Success! 🎉" if success else "Game Over. ❌"
-    message = f"{status} Hidden state: {state}. Your performance: {performance}."
+    message = f"Guess ag production! My performance today {performance}. https://croppler.streamlit.app/"
     recipient = ""  # Replace with a default number if needed, or leave blank
     sms_link = f"sms:{recipient}?body={urllib.parse.quote(message)}"
     return sms_link
