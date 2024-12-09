@@ -8,12 +8,21 @@ import urllib.parse
 st.html(
     """
     <div style="text-align: center;">
-        <h1><span style="">🌾🍎 Croppler </span>🐮🌱</h1>
+        <h1><span style="">🌾 Croppler </span>🐮</h1>
         <body>The game about US agriculture.</body>
     </div>
     """
 )
 
+
+hide_streamlit_style = """
+<style>
+    #root > div:nth-child(1) > div > div > div > div > section > div {padding-top: 0rem;}
+</style>
+
+"""
+
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Load the dataset
 @st.cache_data
