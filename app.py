@@ -103,7 +103,7 @@ def game_result_dialog(state, attempts, guesses, success):
     
     # Generate the SMS link
     sms_link = generate_sms_link(guesses, state, success)
-    st.markdown(f"[Click here to share your results via SMS!]({sms_link})")
+    st.markdown(f"[Click here to share your results with friends!]({sms_link})")
     
     if st.button("Play Again"):
         # Reset the session state for a new game
@@ -111,13 +111,15 @@ def game_result_dialog(state, attempts, guesses, success):
         del st.session_state.guesses
         del st.session_state.guessed_correctly
         st.rerun()
-
-# Main app logic
 def main():
     # Initialize session state
     if "attempts" not in st.session_state:
         st.session_state.attempts = 0
+    if "guesses" not in st.session_state:
         st.session_state.guesses = []
+    if "states" not in st.session_state:
+        st.session_state.states = []
+    if "guessed_correctly" not in st.session_state:
         st.session_state.guessed_correctly = False
 
     # Display the state rank clue
@@ -164,11 +166,12 @@ def main():
             st.warning("You already completed the game! 🎉")
         elif guess:
             st.session_state.attempts += 1
+            st.session_state.states.append(guess)
             if guess.lower() == random_state.lower():
                 st.session_state.guessed_correctly = True
-                st.session_state.guesses.append("🟢")
+                st.session_state.guesses.append("✅")
             else:
-                st.session_state.guesses.append("🟡")
+                st.session_state.guesses.append("❌")
 
             # Check if the game should end
             if st.session_state.attempts == 5 or st.session_state.guessed_correctly:
@@ -181,8 +184,12 @@ def main():
 
     # Display guesses so far
     st.write("Your guesses so far:")
-    st.write(" ".join(st.session_state.guesses) or "No guesses yet!")
+    # Interleave states and guesses
+    interleaved = [item for pair in zip(st.session_state.states, st.session_state.guesses) for item in pair]
 
+    # Display the interleaved result or a fallback message
+    st.write(" ".join(interleaved) or "No guesses yet!")
+    
     # Display remaining attempts
     st.write(f"Attempts: {st.session_state.attempts}/5")
 
