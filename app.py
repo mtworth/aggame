@@ -5,7 +5,15 @@ import random
 import urllib.parse
 
 # Streamlit app title
-st.title("🌾 🐄 🍇 Croppler 🌾 🐄 🍇")
+st.html(
+    """
+    <div style="text-align: center;">
+        <h1><span style="">🌾🍎 Croppler </span>🐮🌱</h1>
+        <body>The game about US agriculture.</body>
+    </div>
+    """
+)
+
 
 # Load the dataset
 @st.cache_data
@@ -32,6 +40,32 @@ filtered_data = filtered_data[filtered_data['Value'].notna() & (filtered_data['V
 # Filter out specific commodities
 exclude_commodities = ["Total agricultural exports", "Total plant products", "Total animal products"]
 filtered_data = filtered_data[~filtered_data['Commodity'].isin(exclude_commodities)]
+
+# Calculate total agricultural production by state for 2022
+@st.cache_data
+def calculate_state_rankings(data, year):
+    # Filter data for the specific year and exclude total categories
+    year_data = data[
+        (data['Year'] == year) & 
+        (~data['Commodity'].isin(["Total agricultural exports", "Total plant products", "Total animal products"]))
+    ]
+    
+    # Sum the values by state
+    state_totals = year_data.groupby('State')['Value'].sum().reset_index()
+    
+    # Sort states by total value in descending order
+    state_totals_sorted = state_totals.sort_values('Value', ascending=False)
+    
+    # Add ranking column
+    state_totals_sorted['Rank'] = range(1, len(state_totals_sorted) + 1)
+    
+    return state_totals_sorted
+
+# Calculate state rankings
+state_rankings = calculate_state_rankings(data, 2022)
+
+# Find the rank of the random state
+state_rank = state_rankings[state_rankings['State'] == random_state]['Rank'].values[0]
 
 # Summarize export total values by commodity
 commodity_data = filtered_data.groupby('Commodity', as_index=False)['Value'].sum()
@@ -86,13 +120,16 @@ def main():
         st.session_state.guesses = []
         st.session_state.guessed_correctly = False
 
+    # Display the state rank clue
+    st.info(f"**Instructions:** Guess which state exported these agriculture products!   \n   \n **Clue** 🌟: This state ranks {state_rank} in total agricultural production in 2022.")
+
     # Create a treemap using Plotly
     if not commodity_data.empty:
         fig = px.treemap(
             commodity_data,
             path=['Commodity'],  # Treemap partition by commodity
             values='Value',  # Size of partitions based on export total value
-            title=f"Guess which state exported these agriculture products!",
+            title=f"",
             color='Value',  # Color intensity based on export value
             color_continuous_scale='Viridis',
             hover_data={'Commodity': True, 'Formatted_Value': True}  # Show formatted value on hover
